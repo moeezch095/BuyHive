@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id              Int      @id @default(autoincrement())
+  first_name      String
+  last_name       String
+  company_name    String
+  country         String
+  email           String   @unique
+  phone_number    String
+  password        String
+  reset_token     String?
+  reset_token_exp DateTime?
+
+  products        product[]
+    @@map("user")
+}
+
+model category {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  sub_categories sub_category[]
+}
+
+model sub_category {
+  id           Int    @id @default(autoincrement())
+  name         String
+
+  category_id  Int
+  category     category @relation(fields: [category_id], references: [id])
+
+  parent_id    Int?
+  parent       sub_category?  @relation("subcat_to_subcat", fields: [parent_id], references: [id])
+  children     sub_category[] @relation("subcat_to_subcat")
+
+  products     product[]
+}
+
+model product {
+  id              Int      @id @default(autoincrement())
+  name            String
+  model_no        String
+  brand           String
+  sold_by         String
+  certifications  String
+  price           Float
+  picture         String
+  source_country  String
+
+  user_id         Int
+  user            user @relation(fields: [user_id], references: [id])
+
+  sub_category_id Int
+  sub_category    sub_category @relation(fields: [sub_category_id], references: [id])
+}
